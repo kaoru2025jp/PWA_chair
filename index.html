@@ -2,127 +2,56 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>PWA_office｜条文検索</title>
-
+  <title>法文検索（GAS連携）</title>
   <style>
     body {
       font-family: sans-serif;
       padding: 20px;
-      background: #fafafa;
     }
-
-    h1 {
-      font-size: 22px;
-      margin-bottom: 15px;
-    }
-
-    .box {
-      background: #ffffff;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 6px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
-    }
-
     input {
       padding: 8px;
       width: 220px;
-      margin-right: 5px;
     }
-
     button {
-      padding: 8px 15px;
-      margin: 3px 0;
-      cursor: pointer;
+      padding: 8px 16px;
+      margin-left: 5px;
     }
-
-    pre {
-      white-space: pre-wrap;
+    #result {
+      margin-top: 20px;
+      padding: 12px;
       background: #f4f4f4;
-      padding: 10px;
-      border-radius: 4px;
+      white-space: pre-wrap;
     }
   </style>
 </head>
-
 <body>
 
-<h1>制度ロジック／条文検索</h1>
+<h1>検索キーによる説明表示</h1>
 
-<div class="box">
-  <button onclick="loadLaw1()">定義を見る</button>
-  <button onclick="loadLaw2()">全条文を見る</button>
-  <button onclick="runSystem()">実行</button>
-</div>
+<input id="keyInput" placeholder="政府証券 / 仲介 / オプション など">
+<button onclick="search()">検索</button>
 
-<div class="box">
-  <strong>条文検索（キーワード指定）</strong><br><br>
-  <input type="text" id="searchKey" placeholder="例：政府証券 / 融資">
-  <button onclick="searchLaw()">検索</button>
-</div>
-
-<div class="box">
-  <pre id="output">ここに結果が表示されます</pre>
-</div>
+<div id="result">ここに結果が表示されます</div>
 
 <script>
-  // ★★★ あなたの GAS WebApp URL ★★★
-  const API_URL =
-    "https://script.google.com/macros/s/AKfycbwM4VuM_-YjrlDLTACYp5H9hD3ZuBeVOCTu2Dc57KkRTjXU9hHbz4q_OpmJ9Kx-01OemA/exec";
+const GAS_URL = "ここにGASのWebアプリURLを貼る";
 
-  function loadLaw1() {
-    fetch(API_URL + "?step=law1")
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("output").textContent =
-          data.title + "\n\n" + data.laws.join("\n");
-      });
+function search() {
+  const key = document.getElementById("keyInput").value.trim();
+  if (!key) {
+    document.getElementById("result").textContent = "検索キーを入力してください";
+    return;
   }
 
-  function loadLaw2() {
-    fetch(API_URL + "?step=law2")
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("output").textContent =
-          data.title + "\n\n" + data.articles.join("\n");
-      });
-  }
-
-  function runSystem() {
-    fetch(API_URL + "?step=run")
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("output").innerHTML =
-          `<button onclick="window.open('${data.pwaUrl}', '_blank')">
-            実行する
-          </button>`;
-      });
-  }
-
-  function searchLaw() {
-    const key = document.getElementById("searchKey").value;
-
-    if (!key) {
-      document.getElementById("output").textContent =
-        "検索キーワードを入力してください";
-      return;
-    }
-
-    fetch(API_URL + "?step=search&key=" + encodeURIComponent(key))
-      .then(res => res.json())
-      .then(data => {
-        if (data.ok) {
-          document.getElementById("output").textContent = data.article;
-        } else {
-          document.getElementById("output").textContent =
-            "該当する条文はありません";
-        }
-      })
-      .catch(err => {
-        document.getElementById("output").textContent =
-          "通信エラー：" + err;
-      });
-  }
+  fetch(`${GAS_URL}?key=${encodeURIComponent(key)}`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("result").textContent = data.result;
+    })
+    .catch(() => {
+      document.getElementById("result").textContent = "接続エラー";
+    });
+}
 </script>
 
 </body>
