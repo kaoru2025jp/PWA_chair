@@ -2,24 +2,33 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>法文検索（GAS連携）</title>
+  <title>PWA_chair｜説明検索</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
     body {
       font-family: sans-serif;
       padding: 20px;
+      background: #fafafa;
+    }
+    h1 {
+      font-size: 1.4em;
     }
     input {
       padding: 8px;
       width: 220px;
+      max-width: 100%;
     }
     button {
       padding: 8px 16px;
       margin-left: 5px;
+      cursor: pointer;
     }
     #result {
       margin-top: 20px;
       padding: 12px;
-      background: #f4f4f4;
+      background: #f0f0f0;
+      border-radius: 4px;
       white-space: pre-wrap;
     }
   </style>
@@ -28,31 +37,43 @@
 
 <h1>検索キーによる説明表示</h1>
 
-<input id="keyInput" placeholder="政府証券 / 仲介 / オプション など">
+<input
+  id="keyInput"
+  type="text"
+  placeholder="政府証券 / 仲介 / オプション など">
+
 <button onclick="search()">検索</button>
 
 <div id="result">ここに結果が表示されます</div>
 
 <script>
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzRDmpeZkgITr5cAG6S7ceAy7IeeQdtYyZx6OZELWZWOToXIC-qLkJjalokWtTkjL2VfQ/exec";
+/*
+  ★ 必ずここだけをあなたの GAS WebアプリURL にする
+  例：
+  https://script.google.com/macros/s/AKfycbxxxxxxx/exec
+*/
+const GAS_URL = "ここにGASのWebアプリURLを貼る";
 
 function search() {
   const key = document.getElementById("keyInput").value.trim();
+  const resultEl = document.getElementById("result");
+
   if (!key) {
-    document.getElementById("result").textContent = "検索キーを入力してください";
+    resultEl.textContent = "検索キーを入力してください";
     return;
   }
 
   fetch(`${GAS_URL}?key=${encodeURIComponent(key)}`)
-    .then(res => res.json())
+    .then(response => response.json())
     .then(data => {
-      document.getElementById("result").textContent = data.result;
+      resultEl.textContent = data.result;
     })
     .catch(() => {
-      document.getElementById("result").textContent = "接続エラー";
+      resultEl.textContent = "接続エラー（GASのURLを確認してください）";
     });
 }
 </script>
 
 </body>
 </html>
+
